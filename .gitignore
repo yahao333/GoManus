@@ -343,4 +343,7 @@ config/config.toml
 # Logs
 logs/
 
+# Build directory
+build/
+
 FIXES.md
