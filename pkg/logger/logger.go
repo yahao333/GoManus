@@ -33,7 +33,7 @@ func createLogger(logPath string, level zapcore.Level) (*zap.Logger, error) {
 		}
 	}
 
-	// 配置编码器
+	// 配置编码器（控制台友好格式）
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "time",
 		LevelKey:       "level",
@@ -43,14 +43,15 @@ func createLogger(logPath string, level zapcore.Level) (*zap.Logger, error) {
 		MessageKey:     "msg",
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeTime:     zapcore.ISO8601TimeEncoder,
-		EncodeDuration: zapcore.SecondsDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
+		EncodeLevel:    zapcore.CapitalColorLevelEncoder,  // 彩色大写级别
+		EncodeTime:     zapcore.ISO8601TimeEncoder,    // ISO 时间格式
+		EncodeDuration: zapcore.StringDurationEncoder,   // 人类可读的持续时间
+		EncodeCaller:   zapcore.ShortCallerEncoder,     // 短调用者信息
+		ConsoleSeparator: "  ",                           // 控制台分隔符
 	}
 
 	// 创建编码器
-	encoder := zapcore.NewJSONEncoder(encoderConfig)
+	encoder := zapcore.NewConsoleEncoder(encoderConfig)
 
 	// 创建写入器
 	var writers []zapcore.WriteSyncer
