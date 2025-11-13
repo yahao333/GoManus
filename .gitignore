@@ -186,3 +186,8 @@ jspm_packages/
 
 # Configuration files
 config/config.toml
+
+# Logs
+logs/
+
+FIXES.md
