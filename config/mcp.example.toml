@@ -1,0 +1,37 @@
+# MCP配置示例
+# Model Context Protocol (MCP) 配置
+
+[mcp]
+enabled = true
+
+[mcp.servers]
+
+# SSE服务器示例
+[mcp.servers.weather]
+type = "sse"
+url = "http://localhost:8080/weather/sse"
+
+[mcp.servers.filesystem]
+type = "sse"  
+url = "http://localhost:8080/filesystem/sse"
+
+# stdio服务器示例
+[mcp.servers.git]
+type = "stdio"
+command = "mcp-server-git"
+args = ["--repository", "."]
+
+[mcp.servers.sqlite]
+type = "stdio"
+command = "mcp-server-sqlite"
+args = ["--db-path", "data.db"]
+
+# 更多服务器配置示例
+[mcp.servers.github]
+type = "sse"
+url = "http://localhost:8080/github/sse"
+
+[mcp.servers.postgres]
+type = "stdio"
+command = "mcp-server-postgres"
+args = ["--connection-string", "postgresql://localhost/mydb"]

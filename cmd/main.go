@@ -215,13 +215,30 @@ func runDirect(cmd *cobra.Command, args []string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 处理信号
-	sigChan := make(chan os.Signal, 1)
+	// 处理信号 - 使用更大的缓冲区避免信号丢失
+	sigChan := make(chan os.Signal, 10)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	// 设置信号处理goroutine
 	go func() {
-		<-sigChan
-		logger.Info("收到中断信号，正在关闭...")
-		cancel()
+		sigCount := 0
+		for {
+			select {
+			case sig := <-sigChan:
+				sigCount++
+				logger.Info("收到中断信号，正在关闭...",
+					zap.String("signal", sig.String()),
+					zap.Int("count", sigCount))
+				cancel()
+				// 第一次中断后，第二次强制退出
+				if sigCount >= 2 {
+					logger.Info("收到多次中断信号，强制退出")
+					os.Exit(1)
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
 	}()
 
 	logger.Info("GoManus 启动")
@@ -310,6 +327,19 @@ enabled = true
 type = "sqlite"
 path = "~/.gomanus/memory.db"
 max_messages = 10000
+
+[mcp]
+enabled = false
+
+# MCP服务器配置示例
+# [mcp.servers.weather]
+# type = "sse"
+# url = "http://localhost:8080/weather/sse"
+#
+# [mcp.servers.filesystem]
+# type = "stdio"
+# command = "mcp-server-filesystem"
+# args = ["--path", "/home/user/documents"]
 `
 
 	if err := os.WriteFile(configPath, []byte(defaultConfig), 0644); err != nil {

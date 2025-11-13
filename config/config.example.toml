@@ -143,21 +143,21 @@ cleanup = true                                         # 是否启用清理步�
 # =============================================================================
 
 [mcp]
-server_reference = "app.mcp.server"                   # 服务器引用
+enabled = false                                       # 是否启用MCP功能
 
 # MCP 服务器配置示例
 [mcp.servers]
 [mcp.servers.file_server]
-type = "stdio"                                         # 服务器类型: stdio, http
-url = ""                                               # 服务器 URL（http 类型）
+type = "stdio"                                        # 服务器类型: stdio, sse
+url = ""                                              # 服务器 URL（sse 类型）
 command = "mcp-server-file"                           # 命令（stdio 类型）
-args = ["--port", "3000"]                            # 命令参数
+args = ["--port", "3000"]                             # 命令参数
 
 [mcp.servers.web_server]
-type = "http"                                         # HTTP 服务器
+type = "sse"                                          # SSE 服务器
 url = "http://localhost:8080/mcp"                     # 服务器 URL
-command = ""                                           # 命令（http 类型时为空）
-args = []                                              # 参数（http 类型时为空）
+command = ""                                          # 命令（sse 类型时为空）
+args = []                                             # 参数（sse 类型时为空）
 
 # =============================================================================
 # 日志配置

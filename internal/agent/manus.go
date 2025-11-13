@@ -3,11 +3,13 @@ package agent
 import (
     "context"
     "fmt"
+    "time"
 
     "github.com/yahao333/GoManus/pkg/config"
     "github.com/yahao333/GoManus/internal/logger"
     "github.com/yahao333/GoManus/internal/schema"
     "github.com/yahao333/GoManus/internal/tool"
+    "github.com/yahao333/GoManus/internal/mcp"
     "go.uber.org/zap"
 )
 
@@ -16,6 +18,7 @@ type Manus struct {
 	*ToolCallAgent
 	MaxObserve    int
 	SpecialTools  []string
+	MCPClients    *mcp.MCPClients
 }
 
 // NewManus 创建新的Manus智能体
@@ -30,6 +33,7 @@ func NewManus() (*Manus, error) {
 - StrReplaceEditor: 编辑文件
 - AskHuman: 向用户提问
 - Terminate: 完成任务
+- MCP工具: 通过MCP协议连接的远程工具
 
 请根据用户的需求选择合适的工具。`, config.GetConfig().GetWorkspaceRoot())
 
@@ -49,6 +53,7 @@ func NewManus() (*Manus, error) {
 		ToolCallAgent: toolCallAgent,
 		MaxObserve:    10000,
 		SpecialTools:  []string{"Terminate"},
+		MCPClients:    mcp.NewMCPClients(logger.GetLogger()),
 	}, nil
 }
 
@@ -61,7 +66,57 @@ func (m *Manus) Initialize(ctx context.Context) error {
 	// 添加默认工具
 	m.addDefaultTools()
 
+	// 初始化MCP客户端
+	if err := m.initializeMCPClients(ctx); err != nil {
+		logger.Warn("MCP客户端初始化失败", zap.Error(err))
+		// 不返回错误，继续运行，MCP是可选功能
+	}
+
 	logger.Info("Manus智能体初始化完成")
+	return nil
+}
+
+// Cleanup 清理资源
+func (m *Manus) Cleanup(ctx context.Context) error {
+	// 关闭MCP连接
+	if m.MCPClients != nil {
+		if err := m.MCPClients.Close(); err != nil {
+			logger.Error("关闭MCP客户端失败", zap.Error(err))
+		}
+	}
+	
+	// 调用父类的清理方法
+	return m.ToolCallAgent.Cleanup(ctx)
+}
+
+// initializeMCPClients 初始化MCP客户端
+func (m *Manus) initializeMCPClients(ctx context.Context) error {
+	mcpConfig := config.GetConfig().MCP
+	if !mcpConfig.Enabled {
+		logger.Info("MCP功能未启用")
+		return nil
+	}
+
+	logger.Info("开始初始化MCP客户端")
+	
+	// 从配置初始化MCP客户端
+	if err := m.MCPClients.InitializeFromConfig(ctx, &mcpConfig); err != nil {
+		return fmt.Errorf("从配置初始化MCP客户端失败: %w", err)
+	}
+
+	// 获取所有MCP工具并添加到可用工具中
+	mcpTools := m.MCPClients.GetTools()
+	if len(mcpTools) > 0 {
+		logger.Info("添加MCP工具到可用工具集", zap.Int("tool_count", len(mcpTools)))
+		
+		for _, mcpTool := range mcpTools {
+			// 创建工具适配器
+			adapter := mcp.NewMCPToolAdapter(mcpTool)
+			m.AvailableTools.AddTool(adapter)
+		}
+	}
+
+	logger.Info("MCP客户端初始化完成", zap.Int("tool_count", len(mcpTools)))
 	return nil
 }
 
@@ -96,8 +151,12 @@ func (m *Manus) addDefaultTools() {
 func (m *Manus) Run(ctx context.Context, prompt string) error {
 	logger.Info("开始运行Manus智能体", zap.String("prompt", prompt))
 	
+	// 创建带超时的初始化上下文
+	initCtx, initCancel := context.WithTimeout(ctx, 30*time.Second)
+	defer initCancel()
+	
 	// 初始化
-	if err := m.Initialize(ctx); err != nil {
+	if err := m.Initialize(initCtx); err != nil {
 		return fmt.Errorf("初始化失败: %w", err)
 	}
 	defer m.Cleanup(ctx)

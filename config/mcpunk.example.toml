@@ -1,0 +1,27 @@
+# MCPunk MCP服务器配置示例
+# MCPunk是一个代码分析工具，提供智能搜索功能
+# 包括：get_a_joke, configure_project, list_all_files_in_project, find_files_by_chunk_content等工具
+
+[mcp]
+enabled = true
+
+[mcp.servers.mcpunk]
+name = "mcpunk"
+type = "stdio"  # MCPunk使用stdio传输方式
+command = "uvx"
+args = ["mcpunk"]
+# 如果需要完整路径，使用绝对路径：
+# command = "/Users/username/.local/bin/uvx"
+# args = ["mcpunk"]
+
+# 可选的环境变量配置
+[mcp.servers.mcpunk.env]
+# MCPUNK_INCLUDE_CHARS_IN_RESPONSE = "false"
+
+# 备用配置（如果uvx命令不可用）
+# [mcp.servers.mcpunk_alt]
+# name = "mcpunk_alt"
+# type = "stdio"
+# command = "python"
+# args = ["-m", "mcpunk"]
+# working_directory = "/path/to/mcpunk"

@@ -21,6 +21,7 @@ type Config struct {
 	Logging LoggingConfig `mapstructure:"logging"`
 	Plugins PluginConfig  `mapstructure:"plugins"`
 	Memory  MemoryConfig  `mapstructure:"memory"`
+	MCP     MCPConfig     `mapstructure:"mcp"`
 }
 
 // LLMConfig LLM配置
@@ -91,6 +92,20 @@ type MemoryConfig struct {
 	Type        string `mapstructure:"type"`
 	Path        string `mapstructure:"path"`
 	MaxMessages int    `mapstructure:"max_messages"`
+}
+
+// MCPServerConfig MCP服务器配置
+type MCPServerConfig struct {
+	Type    string   `mapstructure:"type"`    // 服务器连接类型 (sse 或 stdio)
+	URL     string   `mapstructure:"url"`     // SSE连接的URL
+	Command string   `mapstructure:"command"` // stdio连接的命令
+	Args    []string `mapstructure:"args"`    // stdio命令的参数
+}
+
+// MCPConfig MCP配置
+type MCPConfig struct {
+	Enabled bool                    `mapstructure:"enabled"`
+	Servers map[string]MCPServerConfig `mapstructure:"servers"`
 }
 
 // LLMSettings LLM设置 (兼容旧接口)
@@ -209,4 +224,7 @@ func setDefaults() {
 	viper.SetDefault("memory.type", "sqlite")
 	viper.SetDefault("memory.path", "~/.gomanus/memory.db")
 	viper.SetDefault("memory.max_messages", 10000)
+
+	viper.SetDefault("mcp.enabled", false)
+	viper.SetDefault("mcp.servers", map[string]interface{}{})
 }
