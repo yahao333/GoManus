@@ -183,3 +183,6 @@ jspm_packages/
 
 # DynamoDB Local files
 .dynamodb/
+
+# Configuration files
+config/config.toml
