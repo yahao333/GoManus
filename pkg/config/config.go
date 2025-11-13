@@ -2,299 +2,211 @@ package config
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/spf13/viper"
 )
 
-// LLMSettings LLM配置
-type LLMSettings struct {
-	Model          string  `mapstructure:"model"`
-	BaseURL        string  `mapstructure:"base_url"`
-	APIKey         string  `mapstructure:"api_key"`
-	MaxTokens      int     `mapstructure:"max_tokens"`
-	MaxInputTokens *int    `mapstructure:"max_input_tokens"`
-	Temperature    float64 `mapstructure:"temperature"`
-	APIType        string  `mapstructure:"api_type"`
-	APIVersion     string  `mapstructure:"api_version"`
-}
-
-// ProxySettings 代理配置
-type ProxySettings struct {
-	Server   string `mapstructure:"server"`
-	Username string `mapstructure:"username"`
-	Password string `mapstructure:"password"`
-}
-
-// SearchSettings 搜索配置
-type SearchSettings struct {
-	Engine          string   `mapstructure:"engine"`
-	FallbackEngines []string `mapstructure:"fallback_engines"`
-	RetryDelay      int      `mapstructure:"retry_delay"`
-	MaxRetries      int      `mapstructure:"max_retries"`
-	Lang            string   `mapstructure:"lang"`
-	Country         string   `mapstructure:"country"`
-}
-
-// BrowserSettings 浏览器配置
-type BrowserSettings struct {
-	Headless            bool          `mapstructure:"headless"`
-	DisableSecurity     bool          `mapstructure:"disable_security"`
-	ExtraChromiumArgs   []string      `mapstructure:"extra_chromium_args"`
-	ChromeInstancePath  string        `mapstructure:"chrome_instance_path"`
-	WssURL              string        `mapstructure:"wss_url"`
-	CDPURL              string        `mapstructure:"cdp_url"`
-	Proxy               *ProxySettings  `mapstructure:"proxy"`
-	MaxContentLength    int           `mapstructure:"max_content_length"`
-}
-
-// SandboxSettings 沙盒配置
-type SandboxSettings struct {
-	UseSandbox     bool   `mapstructure:"use_sandbox"`
-	Image          string `mapstructure:"image"`
-	WorkDir        string `mapstructure:"work_dir"`
-	MemoryLimit    string `mapstructure:"memory_limit"`
-	CPULimit       float64 `mapstructure:"cpu_limit"`
-	Timeout        int    `mapstructure:"timeout"`
-	NetworkEnabled bool   `mapstructure:"network_enabled"`
-}
-
-// DaytonaSettings Daytona配置
-type DaytonaSettings struct {
-	Enabled            bool   `mapstructure:"enabled"`
-	DaytonaAPIKey      string `mapstructure:"daytona_api_key"`
-	DaytonaServerURL   string `mapstructure:"daytona_server_url"`
-	DaytonaTarget      string `mapstructure:"daytona_target"`
-	SandboxImageName   string `mapstructure:"sandbox_image_name"`
-	SandboxEntrypoint  string `mapstructure:"sandbox_entrypoint"`
-	VNCPassword        string `mapstructure:"vnc_password"`
-}
-
-// MCPServerConfig MCP服务器配置
-type MCPServerConfig struct {
-	Type    string   `mapstructure:"type"`
-	URL     string   `mapstructure:"url"`
-	Command string   `mapstructure:"command"`
-	Args    []string `mapstructure:"args"`
-}
-
-// MCPSettings MCP配置
-type MCPSettings struct {
-	ServerReference string                    `mapstructure:"server_reference"`
-	Servers         map[string]MCPServerConfig  `mapstructure:"servers"`
-}
-
-// RunflowSettings 工作流配置
-type RunflowSettings struct {
-	UseDataAnalysisAgent bool `mapstructure:"use_data_analysis_agent"`
-}
-
-// AppConfig 应用配置
-type AppConfig struct {
-	LLM          map[string]LLMSettings  `mapstructure:"llm"`
-	Sandbox      *SandboxSettings        `mapstructure:"sandbox"`
-	BrowserConfig *BrowserSettings       `mapstructure:"browser"`
-	SearchConfig *SearchSettings         `mapstructure:"search"`
-	MCPConfig    *MCPSettings            `mapstructure:"mcp"`
-	RunflowConfig *RunflowSettings       `mapstructure:"runflow"`
-	DaytonaConfig *DaytonaSettings       `mapstructure:"daytona"`
-}
-
-// Config 全局配置单例
-type Config struct {
-	viper   *viper.Viper
-	config  *AppConfig
-	mu      sync.RWMutex
-}
-
 var (
-	instance *Config
-	once     sync.Once
+	globalConfig *Config
+	configOnce   sync.Once
+	configMutex  sync.RWMutex
 )
 
-// GetConfig 获取配置实例
-func GetConfig() *Config {
-	once.Do(func() {
-		instance = &Config{
-			viper: viper.New(),
-		}
-		instance.init()
-	})
-	return instance
+// Config 主配置结构
+type Config struct {
+	LLM     LLMConfig     `mapstructure:"llm"`
+	Agent   AgentConfig   `mapstructure:"agent"`
+	Tools   ToolsConfig   `mapstructure:"tools"`
+	Logging LoggingConfig `mapstructure:"logging"`
+	Plugins PluginConfig  `mapstructure:"plugins"`
+	Memory  MemoryConfig  `mapstructure:"memory"`
 }
 
-// init 初始化配置
-func (c *Config) init() {
-	// 设置配置文件名和路径
-	c.viper.SetConfigName("config")
-	c.viper.SetConfigType("toml")
-	
-	// 添加配置路径
-	c.viper.AddConfigPath("./config")
-	c.viper.AddConfigPath("../config")
-	c.viper.AddConfigPath(".")
-	
-	// 设置环境变量前缀
-	c.viper.SetEnvPrefix("GOMANUS")
-	c.viper.AutomaticEnv()
-	
+// LLMConfig LLM配置
+type LLMConfig struct {
+	Default   string                  `mapstructure:"default"`
+	Providers map[string]LLMProvider `mapstructure:"providers"`
+}
+
+// LLMProvider LLM提供者配置
+type LLMProvider struct {
+	APIType     string  `mapstructure:"api_type"`
+	APIKey      string  `mapstructure:"api_key"`
+	BaseURL     string  `mapstructure:"base_url"`
+	APIVersion  string  `mapstructure:"api_version"`
+	Model       string  `mapstructure:"model"`
+	MaxTokens   int     `mapstructure:"max_tokens"`
+	Temperature float64 `mapstructure:"temperature"`
+}
+
+// AgentConfig 智能体配置
+type AgentConfig struct {
+	MaxSteps  int `mapstructure:"max_steps"`
+	MaxObserve int `mapstructure:"max_observe"`
+}
+
+// ToolsConfig 工具配置
+type ToolsConfig struct {
+	Python PythonToolConfig `mapstructure:"python"`
+	Browser BrowserToolConfig `mapstructure:"browser"`
+	Search  SearchToolConfig `mapstructure:"search"`
+}
+
+// PythonToolConfig Python工具配置
+type PythonToolConfig struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Timeout string `mapstructure:"timeout"`
+}
+
+// BrowserToolConfig 浏览器工具配置
+type BrowserToolConfig struct {
+	Enabled  bool `mapstructure:"enabled"`
+	Headless bool `mapstructure:"headless"`
+}
+
+// SearchToolConfig 搜索工具配置
+type SearchToolConfig struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Engine  string `mapstructure:"engine"`
+}
+
+// LoggingConfig 日志配置
+type LoggingConfig struct {
+	Level string `mapstructure:"level"`
+	File  string `mapstructure:"file"`
+}
+
+// PluginConfig 插件配置
+type PluginConfig struct {
+	Enabled      bool     `mapstructure:"enabled"`
+	Directories  []string `mapstructure:"directories"`
+	ManifestFile string   `mapstructure:"manifest_file"`
+	AutoLoad     bool     `mapstructure:"auto_load"`
+}
+
+// MemoryConfig 内存配置
+type MemoryConfig struct {
+	Enabled     bool   `mapstructure:"enabled"`
+	Type        string `mapstructure:"type"`
+	Path        string `mapstructure:"path"`
+	MaxMessages int    `mapstructure:"max_messages"`
+}
+
+// LLMSettings LLM设置 (兼容旧接口)
+type LLMSettings = LLMProvider
+
+// LoadConfig 加载配置文件
+func LoadConfig(configPath string) (*Config, error) {
+	viper.SetConfigFile(configPath)
+	viper.SetConfigType("toml")
+
+	// 设置默认值
+	setDefaults()
+
 	// 读取配置文件
-	if err := c.viper.ReadInConfig(); err != nil {
-		// 如果配置文件不存在，尝试读取示例配置
-		c.viper.SetConfigName("config.example")
-		if err := c.viper.ReadInConfig(); err != nil {
-			panic(fmt.Errorf("无法读取配置文件: %w", err))
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("读取配置文件失败: %w", err)
+	}
+
+	var config Config
+	if err := viper.Unmarshal(&config); err != nil {
+		return nil, fmt.Errorf("解析配置文件失败: %w", err)
+	}
+
+	// 设置全局配置
+	configMutex.Lock()
+	globalConfig = &config
+	configMutex.Unlock()
+
+	return &config, nil
+}
+
+// GetConfig 获取全局配置实例
+func GetConfig() *Config {
+	configMutex.RLock()
+	defer configMutex.RUnlock()
+	return globalConfig
+}
+
+// Validate 验证配置
+func (c *Config) Validate() error {
+	if c.LLM.Default == "" {
+		return fmt.Errorf("未设置默认LLM提供者")
+	}
+
+	if _, ok := c.LLM.Providers[c.LLM.Default]; !ok {
+		return fmt.Errorf("默认LLM提供者 %s 未配置", c.LLM.Default)
+	}
+
+	// 验证每个提供者
+	for name, provider := range c.LLM.Providers {
+		if provider.APIKey == "" {
+			return fmt.Errorf("LLM提供者 %s 未设置API密钥", name)
+		}
+		if provider.Model == "" {
+			return fmt.Errorf("LLM提供者 %s 未设置模型", name)
 		}
 	}
-	
-	// 解析配置
-	c.parseConfig()
-}
 
-// parseConfig 解析配置
-func (c *Config) parseConfig() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	
-	var appConfig AppConfig
-	if err := c.viper.Unmarshal(&appConfig); err != nil {
-		panic(fmt.Errorf("无法解析配置文件: %w", err))
-	}
-	
-	c.config = &appConfig
-}
-
-// Reload 重新加载配置
-func (c *Config) Reload() error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	
-	if err := c.viper.ReadInConfig(); err != nil {
-		return fmt.Errorf("重新加载配置文件失败: %w", err)
-	}
-	
-	var appConfig AppConfig
-	if err := c.viper.Unmarshal(&appConfig); err != nil {
-		return fmt.Errorf("重新解析配置文件失败: %w", err)
-	}
-	
-	c.config = &appConfig
 	return nil
 }
 
-// GetLLMSettings 获取LLM配置
-func (c *Config) GetLLMSettings(name string) (LLMSettings, bool) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	
-	if c.config == nil || c.config.LLM == nil {
-		return LLMSettings{}, false
-	}
-	
-	settings, ok := c.config.LLM[name]
-	return settings, ok
+// GetDefaultLLMProvider 获取默认LLM提供者
+func (c *Config) GetDefaultLLMProvider() LLMProvider {
+	return c.LLM.Providers[c.LLM.Default]
 }
 
-// GetDefaultLLMSettings 获取默认LLM配置
-func (c *Config) GetDefaultLLMSettings() LLMSettings {
-	settings, ok := c.GetLLMSettings("default")
-	if !ok {
-		// 返回默认配置
-		return LLMSettings{
-			Model:       "gpt-4o",
-			BaseURL:     "https://api.openai.com/v1",
-			APIKey:      "",
-			MaxTokens:   4096,
-			Temperature: 0.7,
-			APIType:     "openai",
-			APIVersion:  "",
-		}
-	}
-	return settings
+// GetLLMProvider 获取指定LLM提供者
+func (c *Config) GetLLMProvider(name string) (LLMProvider, bool) {
+	provider, ok := c.LLM.Providers[name]
+	return provider, ok
 }
 
-// GetSandboxSettings 获取沙盒配置
-func (c *Config) GetSandboxSettings() *SandboxSettings {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	
-	if c.config == nil {
-		return nil
-	}
-	return c.config.Sandbox
+// GetLLMSettings 获取LLM设置 (兼容旧接口)
+func (c *Config) GetLLMSettings(name string) (LLMProvider, bool) {
+	return c.GetLLMProvider(name)
 }
 
-// GetBrowserSettings 获取浏览器配置
-func (c *Config) GetBrowserSettings() *BrowserSettings {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	
-	if c.config == nil {
-		return nil
-	}
-	return c.config.BrowserConfig
+// GetDefaultLLMSettings 获取默认LLM设置 (兼容旧接口)
+func (c *Config) GetDefaultLLMSettings() LLMProvider {
+	return c.GetDefaultLLMProvider()
 }
 
-// GetSearchSettings 获取搜索配置
-func (c *Config) GetSearchSettings() *SearchSettings {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	
-	if c.config == nil {
-		return nil
-	}
-	return c.config.SearchConfig
-}
-
-// GetMCPSettings 获取MCP配置
-func (c *Config) GetMCPSettings() *MCPSettings {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	
-	if c.config == nil {
-		return nil
-	}
-	return c.config.MCPConfig
-}
-
-// GetRunflowSettings 获取工作流配置
-func (c *Config) GetRunflowSettings() *RunflowSettings {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	
-	if c.config == nil {
-		return nil
-	}
-	return c.config.RunflowConfig
-}
-
-// GetDaytonaSettings 获取Daytona配置
-func (c *Config) GetDaytonaSettings() *DaytonaSettings {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	
-	if c.config == nil {
-		return nil
-	}
-	return c.config.DaytonaConfig
-}
-
-// GetWorkspaceRoot 获取工作空间根目录
+// GetWorkspaceRoot 获取工作空间根目录 (兼容旧接口)
 func (c *Config) GetWorkspaceRoot() string {
-	execPath, err := os.Getwd()
-	if err != nil {
-		return "./workspace"
-	}
-	return filepath.Join(execPath, "workspace")
+	return "."
 }
 
-// GetProjectRoot 获取项目根目录
-func (c *Config) GetProjectRoot() string {
-	execPath, err := os.Getwd()
-	if err != nil {
-		return "."
-	}
-	return execPath
+// setDefaults 设置默认配置
+func setDefaults() {
+	viper.SetDefault("llm.default", "openai")
+	viper.SetDefault("llm.providers.openai.api_type", "openai")
+	viper.SetDefault("llm.providers.openai.base_url", "https://api.openai.com/v1")
+	viper.SetDefault("llm.providers.openai.model", "gpt-4")
+	viper.SetDefault("llm.providers.openai.max_tokens", 2000)
+	viper.SetDefault("llm.providers.openai.temperature", 0.7)
+
+	viper.SetDefault("agent.max_steps", 50)
+	viper.SetDefault("agent.max_observe", 10000)
+
+	viper.SetDefault("tools.python.enabled", true)
+	viper.SetDefault("tools.python.timeout", "30s")
+	viper.SetDefault("tools.browser.enabled", true)
+	viper.SetDefault("tools.browser.headless", true)
+	viper.SetDefault("tools.search.enabled", true)
+	viper.SetDefault("tools.search.engine", "duckduckgo")
+
+	viper.SetDefault("logging.level", "info")
+	viper.SetDefault("logging.file", "~/.gomanus/logs/gomanus.log")
+
+	viper.SetDefault("plugins.enabled", true)
+	viper.SetDefault("plugins.directories", []string{"./plugins", "~/.gomanus/plugins"})
+	viper.SetDefault("plugins.manifest_file", "./plugins/manifest.json")
+	viper.SetDefault("plugins.auto_load", true)
+
+	viper.SetDefault("memory.enabled", true)
+	viper.SetDefault("memory.type", "sqlite")
+	viper.SetDefault("memory.path", "~/.gomanus/memory.db")
+	viper.SetDefault("memory.max_messages", 10000)
 }

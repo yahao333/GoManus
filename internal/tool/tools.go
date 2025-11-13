@@ -10,7 +10,7 @@ import (
     "time"
 
     "github.com/yahao333/GoManus/pkg/config"
-    "github.com/yahao333/GoManus/pkg/logger"
+    "github.com/yahao333/GoManus/internal/logger"
     "go.uber.org/zap"
 )
 

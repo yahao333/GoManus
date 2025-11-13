@@ -6,10 +6,10 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/yahao333/GoManus/pkg/llm"
-	"github.com/yahao333/GoManus/pkg/logger"
-	"github.com/yahao333/GoManus/pkg/schema"
-	"github.com/yahao333/GoManus/pkg/tool"
+	"github.com/yahao333/GoManus/internal/llm"
+	"github.com/yahao333/GoManus/internal/logger"
+	"github.com/yahao333/GoManus/internal/schema"
+	"github.com/yahao333/GoManus/internal/tool"
 	"go.uber.org/zap"
 )
 

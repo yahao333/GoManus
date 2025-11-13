@@ -7,8 +7,8 @@ import (
 
     "github.com/sashabaranov/go-openai"
     "github.com/yahao333/GoManus/pkg/config"
-    "github.com/yahao333/GoManus/pkg/logger"
-    "github.com/yahao333/GoManus/pkg/schema"
+    "github.com/yahao333/GoManus/internal/logger"
+    "github.com/yahao333/GoManus/internal/schema"
     "go.uber.org/zap"
 )
 

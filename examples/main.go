@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/yahao333/GoManus/pkg/agent"
-	"github.com/yahao333/GoManus/pkg/flow"
-	"github.com/yahao333/GoManus/pkg/logger"
-	"github.com/yahao333/GoManus/pkg/schema"
+	"github.com/yahao333/GoManus/internal/agent"
+	"github.com/yahao333/GoManus/internal/flow"
+	"github.com/yahao333/GoManus/internal/logger"
+	"github.com/yahao333/GoManus/internal/schema"
 	"go.uber.org/zap"
 )
 
@@ -55,7 +55,7 @@ func basicExample() {
 	}
 
 	ctx := context.Background()
-	
+
 	// 初始化智能体
 	if err := basicAgent.Initialize(ctx); err != nil {
 		logger.Error("初始化基础智能体失败", zap.Error(err))
@@ -92,7 +92,7 @@ func toolExample() {
 	}
 
 	ctx := context.Background()
-	
+
 	// 初始化智能体
 	if err := toolAgent.Initialize(ctx); err != nil {
 		logger.Error("初始化工具调用智能体失败", zap.Error(err))
@@ -114,11 +114,11 @@ func manusExample() {
 	}
 
 	ctx := context.Background()
-	
+
 	// 运行任务（这里使用简单的任务作为示例）
 	task := "创建一个简单的 Python 脚本来计算斐波那契数列"
 	fmt.Printf("任务: %s\n", task)
-	
+
 	if err := manus.Run(ctx, task); err != nil {
 		logger.Error("运行 Manus 智能体失败", zap.Error(err))
 		return
@@ -131,13 +131,13 @@ func manusExample() {
 func flowExample() {
 	// 创建规划工作流
 	planningFlow := flow.NewPlanningFlow()
-	
+
 	ctx := context.Background()
-	
+
 	// 执行任务
 	task := "创建一个简单的网页应用"
 	fmt.Printf("工作流任务: %s\n", task)
-	
+
 	result, err := planningFlow.Execute(ctx, task)
 	if err != nil {
 		logger.Error("执行工作流失败", zap.Error(err))

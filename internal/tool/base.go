@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/yahao333/GoManus/pkg/schema"
+	"github.com/yahao333/GoManus/internal/schema"
 )
 
 // Tool 工具接口
