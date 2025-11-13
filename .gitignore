@@ -1,188 +1,341 @@
-# Binaries for programs and plugins
+# GoManus 项目 .gitignore
+
+# =============================================================================
+# Go 相关
+# =============================================================================
+
+# 二进制文件和可执行文件
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-
-# Test binary, built with `go test -c`
-*.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-# Go workspace file
-go.work
-
-# Go build artifacts
 GoManus
 gomanus
 main
+examples/gomanus-example
 
-# IDE files
+# 测试相关
+*.test
+coverage.out
+coverage.html
+coverage.txt
+
+# 构建和依赖
+go.sum
+vendor/
+build/
+dist/
+bin/
+
+# Go 工作区
+go.work
+go.work.sum
+
+# =============================================================================
+# 项目特定文件
+# =============================================================================
+
+# 日志文件
+logs/
+*.log
+*.log.*
+
+# 工作区和临时目录
+workspace/
+tmp/
+temp/
+cache/
+
+# 沙盒相关
+sandbox_workspace/
+docker_sandbox/
+container_*
+
+# =============================================================================
+# 配置文件（保留示例，忽略实际配置）
+# =============================================================================
+
+config.toml
+config.*.local.toml
+config.*.dev.toml
+config.*.prod.toml
+config.*.staging.toml
+
+# =============================================================================
+# 敏感信息和密钥
+# =============================================================================
+
+# API 密钥和证书
+*.key
+*.pem
+*.p12
+*.crt
+*.pfx
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 配置文件中的敏感部分
+secrets/
+credentials/
+
+# =============================================================================
+# 开发工具和 IDE
+# =============================================================================
+
+# IDE 配置
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-.DS_Store
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+*.code-workspace
 
-# Logs
-logs/
-*.log
+# 编辑器临时文件
+*.orig
+*.rej
+*.merge_file_*
 
-# Workspace directories
-workspace/
-tmp/
-temp/
+# =============================================================================
+# Python 相关（沙盒环境）
+# =============================================================================
 
-# Configuration files (keep examples, ignore actual configs)
-config.toml
-config.*.local.toml
-config.*.dev.toml
-config.*.prod.toml
+# Python 字节码和缓存
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.pytest_cache/
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+.nox/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
 
-# API keys and secrets
-*.key
-*.pem
-*.p12
-*.crt
-.env
-.env.local
-.env.*.local
+# Python 虚拟环境
+venv/
+env/
+ENV/
+.venv/
+.env/
 
-# Cache directories
-.cache/
-*.cache
+# pip 和 conda
+pip-log.txt
+pip-delete-this-directory.txt
+conda-meta/
+.conda/
 
-# Build artifacts
-build/
-dist/
-bin/
+# =============================================================================
+# 浏览器和自动化相关
+# =============================================================================
 
-# Coverage reports
-coverage.txt
-coverage.out
-coverage.html
+# 浏览器扩展和插件
+*.crx
+*.xpi
+*.zip
 
-# Profiling data
+# 下载和截图
+downloads/
+screenshots/
+screenshots/*.png
+screenshots/*.jpg
+screenshots/*.jpeg
+
+# 浏览器配置和缓存
+chrome_profile/
+firefox_profile/
+browser_data/
+chromedriver*
+geckodriver*
+
+# =============================================================================
+# Docker 和容器相关
+# =============================================================================
+
+# Docker 相关文件
+.dockerignore
+docker-compose.override.yml
+docker-compose.local.yml
+
+# 容器运行时文件
+docker_volumes/
+.container_data/
+
+# =============================================================================
+# 性能分析和调试
+# =============================================================================
+
+# 性能分析文件
 *.prof
 *.pprof
+*.cpu
+*.mem
+*.trace
+*.svg
 
-# Debug files
+# 调试文件
 debug
 debug.test
+core
+core.*
 
-# Generated files
-*_generated.go
+# =============================================================================
+# 数据库和存储
+# =============================================================================
 
-# Database files
+# 数据库文件
 *.db
 *.sqlite
 *.sqlite3
+*.mdb
 
-# Temporary files
-*.tmp
-*.temp
+# 数据文件
+data/
+datasets/
+models/
+*.pkl
+*.joblib
+*.h5
+*.hdf5
+
+# =============================================================================
+# 系统和操作系统相关
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.com.apple.timemachine.supported
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# 版本控制和备份
+# =============================================================================
+
+# Git 相关（除了 .gitignore 本身）
+.gitignore.backup
+.gitkeep
+
+# 备份文件
 *.bak
 *.backup
-
-# Python files (for sandbox/Python execution)
-*.pyc
-__pycache__/
-.pytest_cache/
-*.pyo
-*.pyd
-
-# Browser/Selenium temporary files
-*.crx
-*.zip
-downloads/
-screenshots/
-
-# Docker
-.dockerignore
-docker-compose.override.yml
-
-# Kubernetes
-*.kubeconfig
-
-# Local development
-.local/
-dev/
-development/
-
-# OS generated files
-Thumbs.db
-.Spotlight-V100
-.Trashes
-
-# Package manager files
-go.sum
-
-# Editor backup files
+*.old
 *.orig
 *.rej
+*.tmp
+*.temp
 
-# Merge conflict files
-*.merge_file_*
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
 
-# Runtime data
-pids/
+# =============================================================================
+# 其他工具和框架
+# =============================================================================
+
+# Node.js (如果有前端组件)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Jupyter Notebook (如果用于数据分析)
+.ipynb_checkpoints
+*.ipynb
+
+# LaTeX (如果生成文档)
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.toc
+
+# 临时运行时文件
 *.pid
 *.seed
 *.pid.lock
+pids/
 
-# Coverage directory used by tools like istanbul
-coverage/
+# =============================================================================
+# 开发环境特定
+# =============================================================================
 
-# nyc test coverage
-.nyc_output
+# 本地开发配置
+local/
+dev/
+development/
+staging/
+production/
 
-# Dependency directories
-node_modules/
-jspm_packages/
+# 个人配置
+my_config.toml
+personal_*.toml
 
-# Optional npm cache directory
-.npm
+# 示例输出文件
+examples/output/
+examples/logs/
+examples/workspace/
 
-# Optional eslint cache
-.eslintcache
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-.env.test
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# next.js build output
-.next
-
-# nuxt.js build output
-.nuxt
-
-# vuepress build output
-.vuepress/dist
-
-# Serverless directories
-.serverless
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
+# 测试输出
+test_output/
+test_results/
+integration_test_logs/
 
 # Configuration files
 config/config.toml
