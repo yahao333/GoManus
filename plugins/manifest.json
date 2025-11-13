@@ -1,0 +1,43 @@
+{
+  "plugins": [
+    {
+      "name": "sample",
+      "version": "1.0.0",
+      "description": "示例插件，提供基础的计算工具",
+      "author": "GoManus Team",
+      "entry_point": "sample_plugin.so",
+      "config": {
+        "precision": 2,
+        "timeout": 30
+      },
+      "dependencies": [],
+      "enabled": true
+    },
+    {
+      "name": "web_scraper",
+      "version": "1.0.0",
+      "description": "网页抓取插件",
+      "author": "GoManus Team",
+      "entry_point": "web_scraper.so",
+      "config": {
+        "timeout": 60,
+        "user_agent": "GoManus/1.0"
+      },
+      "dependencies": [],
+      "enabled": false
+    },
+    {
+      "name": "file_processor",
+      "version": "1.0.0",
+      "description": "文件处理插件",
+      "author": "GoManus Team",
+      "entry_point": "file_processor.so",
+      "config": {
+        "max_file_size": 10485760,
+        "supported_formats": ["txt", "csv", "json", "xml"]
+      },
+      "dependencies": [],
+      "enabled": true
+    }
+  ]
+}
