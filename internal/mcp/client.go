@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/yahao333/GoManus/internal/schema"
 	"github.com/yahao333/GoManus/pkg/config"
@@ -203,9 +204,29 @@ func (m *MCPClients) ConnectStdio(ctx context.Context, command string, args []st
 
 // loadToolsLocked 加载工具（内部使用，需要持有锁）
 func (m *MCPClients) loadToolsLocked(ctx context.Context, serverID string, session ClientSession) error {
-	result, err := session.ListTools(ctx)
-	if err != nil {
-		return fmt.Errorf("列出工具失败: %w", err)
+	// 尝试列出工具，带重试机制
+	var result *ListToolsResult
+	var lastErr error
+	
+	for i := 0; i < 3; i++ {
+		if i > 0 {
+			m.logger.Info("重试加载工具", zap.String("server", serverID), zap.Int("attempt", i+1))
+			time.Sleep(time.Second * time.Duration(i))
+		}
+		
+		result, lastErr = session.ListTools(ctx)
+		if lastErr == nil {
+			break
+		}
+		
+		// 检查是否是上下文取消错误
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+	}
+	
+	if lastErr != nil {
+		return fmt.Errorf("列出工具失败（重试3次）: %w", lastErr)
 	}
 
 	for _, tool := range result.Tools {

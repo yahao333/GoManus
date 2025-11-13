@@ -3,6 +3,7 @@ package agent
 import (
     "context"
     "fmt"
+    "strings"
     "time"
 
     "github.com/yahao333/GoManus/pkg/config"
@@ -151,13 +152,18 @@ func (m *Manus) addDefaultTools() {
 func (m *Manus) Run(ctx context.Context, prompt string) error {
 	logger.Info("开始运行Manus智能体", zap.String("prompt", prompt))
 	
-	// 创建带超时的初始化上下文
-	initCtx, initCancel := context.WithTimeout(ctx, 30*time.Second)
+	// 创建带超时的初始化上下文（延长MCP初始化超时时间）
+	initCtx, initCancel := context.WithTimeout(ctx, 60*time.Second)
 	defer initCancel()
 	
 	// 初始化
 	if err := m.Initialize(initCtx); err != nil {
-		return fmt.Errorf("初始化失败: %w", err)
+		// 如果MCP初始化失败，记录警告但继续运行
+		if strings.Contains(err.Error(), "MCP") {
+			logger.Warn("MCP初始化失败，继续运行但MCP工具不可用", zap.Error(err))
+		} else {
+			return fmt.Errorf("初始化失败: %w", err)
+		}
 	}
 	defer m.Cleanup(ctx)
 
