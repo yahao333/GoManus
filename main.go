@@ -13,11 +13,32 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	// Version 应用版本
+	Version = "0.1.0"
+	// BuildTime 构建时间
+	BuildTime = "2025-11-13"
+	// GitCommit Git提交哈希
+	GitCommit = "unknown"
+)
+
 func main() {
 	// 解析命令行参数
-	var prompt string
+	var (
+		prompt   string
+		showVer  bool
+	)
 	flag.StringVar(&prompt, "prompt", "", "输入提示")
+	flag.BoolVar(&showVer, "version", false, "显示版本信息")
 	flag.Parse()
+
+	// 显示版本信息
+	if showVer {
+		fmt.Printf("GoManus v%s\n", Version)
+		fmt.Printf("构建时间: %s\n", BuildTime)
+		fmt.Printf("Git提交: %s\n", GitCommit)
+		os.Exit(0)
+	}
 
 	// 初始化日志
 	if err := logger.InitLogger("logs/gomanus.log", zap.InfoLevel); err != nil {
